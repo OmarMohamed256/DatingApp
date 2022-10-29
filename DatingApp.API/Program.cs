@@ -1,8 +1,8 @@
 using System.Text;
 using DatingApp.API.Data;
 using DatingApp.API.Interfaces;
+using DatingApp.API.Middleware;
 using DatingApp.API.Services;
-using DatingApp.API.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -40,7 +40,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseRouting();
