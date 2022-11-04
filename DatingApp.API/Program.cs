@@ -15,24 +15,9 @@ internal class Program
     {
         
         var builder = WebApplication.CreateBuilder(args);
-        // using var scope = builder.Services.BuildServiceProvider().CreateScope();
-        // var services = scope.ServiceProvider;
-        // try
-        // {
-        //     var context = services.GetRequiredService<DataContext>();
-        //     await context.Database.MigrateAsync();
-        //     await Seed.SeedUsers(context);
-        // }
-        // catch (Exception ex)
-        // {
-        //     var logger = services.GetRequiredService<ILogger<Program>>();
-        //     logger.LogError(ex, "An error occurred during migration");
-        // }
-        // builder.Services.AddScoped<IDbInitializer, DbInitializer>();
-
-        // Add services to the container.
-
+        builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
         builder.Services.AddScoped<ITokenService, TokenService>();
+        builder.Services.AddScoped<IPhotoService, PhotoService>();
         builder.Services.AddControllers();
         builder.Services.AddCors();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
