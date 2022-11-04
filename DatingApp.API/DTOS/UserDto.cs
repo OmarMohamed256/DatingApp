@@ -10,5 +10,6 @@ namespace DatingApp.API.DTOS
         public string UserName { get; set; }
         public String Token { get; set; }
         public string PhotoUrl { get; set; }
+        public string KnownAs { get; set; }
     }
 }
