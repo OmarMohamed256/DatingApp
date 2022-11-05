@@ -18,6 +18,7 @@ internal class Program
         builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
         builder.Services.AddScoped<ITokenService, TokenService>();
         builder.Services.AddScoped<IPhotoService, PhotoService>();
+        builder.Services.AddScoped<ILikesRepository, LikesRepositary>();
         builder.Services.AddScoped<LogUserActivity>();
         builder.Services.AddControllers();
         builder.Services.AddCors();

@@ -1,4 +1,5 @@
 using DatingApp.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 internal static class DbInitializerExtension
 {
