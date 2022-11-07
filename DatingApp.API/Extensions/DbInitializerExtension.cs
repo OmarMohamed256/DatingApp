@@ -12,6 +12,7 @@ internal static class DbInitializerExtension
         try
         {
             var context = services.GetRequiredService<DataContext>();
+            context.Database.Migrate();
             await Seed.SeedUsers(context);
         }
         catch (Exception ex)

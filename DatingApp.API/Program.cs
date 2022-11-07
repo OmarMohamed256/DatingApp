@@ -20,6 +20,7 @@ internal class Program
         builder.Services.AddScoped<IPhotoService, PhotoService>();
         builder.Services.AddScoped<ILikesRepository, LikesRepositary>();
         builder.Services.AddScoped<LogUserActivity>();
+        builder.Services.AddScoped<IMessageRepository, MessageRepository>();
         builder.Services.AddControllers();
         builder.Services.AddCors();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
