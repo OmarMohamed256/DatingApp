@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using AutoMapper;
 using DatingApp.API.Helpers;
+using DatingApp.API.Entities;
+using Microsoft.AspNetCore.Identity;
 
 internal class Program
 {
@@ -23,6 +25,16 @@ internal class Program
         builder.Services.AddScoped<IMessageRepository, MessageRepository>();
         builder.Services.AddControllers();
         builder.Services.AddCors();
+
+        builder.Services.AddIdentityCore<AppUser>(opt => {
+            opt.Password.RequireNonAlphanumeric= false;
+        })
+            .AddRoles<AppRole>()
+            .AddRoleManager<RoleManager<AppRole>>()
+            .AddSignInManager<SignInManager<AppUser>>()
+            .AddRoleValidator<RoleValidator<AppRole>>()
+            .AddEntityFrameworkStores<DataContext>();
+
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -34,6 +46,11 @@ internal class Program
                         ValidateAudience = false,
                     };
                 });
+        builder.Services.AddAuthorization(opt =>
+        {
+            opt.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+            opt.AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"));
+        });
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();

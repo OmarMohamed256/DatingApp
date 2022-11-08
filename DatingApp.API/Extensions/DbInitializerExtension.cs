@@ -1,4 +1,6 @@
 using DatingApp.API.Data;
+using DatingApp.API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 internal static class DbInitializerExtension
@@ -12,8 +14,10 @@ internal static class DbInitializerExtension
         try
         {
             var context = services.GetRequiredService<DataContext>();
-            context.Database.Migrate();
-            await Seed.SeedUsers(context);
+            var userManager = services.GetRequiredService<UserManager<AppUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+            await context.Database.MigrateAsync();
+            await Seed.SeedUsers(userManager, roleManager);
         }
         catch (Exception ex)
         {
