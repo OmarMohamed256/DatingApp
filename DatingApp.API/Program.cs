@@ -10,6 +10,7 @@ using AutoMapper;
 using DatingApp.API.Helpers;
 using DatingApp.API.Entities;
 using Microsoft.AspNetCore.Identity;
+using DatingApp.API.SignalR;
 
 internal class Program
 {
@@ -17,6 +18,7 @@ internal class Program
     {
         
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddSingleton<PresenceTracker>();
         builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
         builder.Services.AddScoped<ITokenService, TokenService>();
         builder.Services.AddScoped<IPhotoService, PhotoService>();
@@ -25,6 +27,7 @@ internal class Program
         builder.Services.AddScoped<IMessageRepository, MessageRepository>();
         builder.Services.AddControllers();
         builder.Services.AddCors();
+        builder.Services.AddSignalR();
 
         builder.Services.AddIdentityCore<AppUser>(opt => {
             opt.Password.RequireNonAlphanumeric= false;
@@ -44,6 +47,23 @@ internal class Program
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"])),
                         ValidateIssuer = false,
                         ValidateAudience = false,
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context => 
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            var path = context.HttpContext.Request.Path;
+                            if(!string.IsNullOrEmpty(accessToken) && 
+                                path.StartsWithSegments("/hubs"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
         builder.Services.AddAuthorization(opt =>
@@ -79,13 +99,18 @@ internal class Program
 
         app.UseRouting();
 
-        app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+        app.UseCors(x => x.AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithOrigins("https://localhost:4200"));
 
         app.UseAuthentication();
 
         app.UseAuthorization();
-
+        
         app.MapControllers();
+        app.MapHub<PresenceHub>("hubs/presence");
+        app.MapHub<MessageHub>("hubs/message");
 
         app.Run();
     }
