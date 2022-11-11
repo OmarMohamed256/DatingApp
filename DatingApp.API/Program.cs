@@ -22,13 +22,13 @@ internal class Program
         builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
         builder.Services.AddScoped<ITokenService, TokenService>();
         builder.Services.AddScoped<IPhotoService, PhotoService>();
-        builder.Services.AddScoped<ILikesRepository, LikesRepositary>();
+
         builder.Services.AddScoped<LogUserActivity>();
-        builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+
         builder.Services.AddControllers();
         builder.Services.AddCors();
         builder.Services.AddSignalR();
-
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddIdentityCore<AppUser>(opt => {
             opt.Password.RequireNonAlphanumeric= false;
         })
@@ -75,7 +75,7 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         
-        builder.Services.AddScoped<IUserRepository, UserRepository>();
+
         builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
         builder.Services.AddDbContext<DataContext>(options =>
         {
