@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DatingApp.API.Data.Migrations
+namespace DatingApp.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221107144204_IdentityAdded")]
-    partial class IdentityAdded
+    [Migration("20221114220628_PhotoManagmentAdded")]
+    partial class PhotoManagmentAdded
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -156,6 +156,34 @@ namespace DatingApp.API.Data.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("DatingApp.API.Entities.Connection", b =>
+                {
+                    b.Property<string>("ConnectionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GroupName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ConnectionId");
+
+                    b.HasIndex("GroupName");
+
+                    b.ToTable("Connections");
+                });
+
+            modelBuilder.Entity("DatingApp.API.Entities.Group", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("Groups");
+                });
+
             modelBuilder.Entity("DatingApp.API.Entities.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -205,6 +233,9 @@ namespace DatingApp.API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsApproved")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsMain")
@@ -341,6 +372,13 @@ namespace DatingApp.API.Data.Migrations
                     b.Navigation("user");
                 });
 
+            modelBuilder.Entity("DatingApp.API.Entities.Connection", b =>
+                {
+                    b.HasOne("DatingApp.API.Entities.Group", null)
+                        .WithMany("Connections")
+                        .HasForeignKey("GroupName");
+                });
+
             modelBuilder.Entity("DatingApp.API.Entities.Message", b =>
                 {
                     b.HasOne("DatingApp.API.Entities.AppUser", "Recipient")
@@ -444,6 +482,11 @@ namespace DatingApp.API.Data.Migrations
                     b.Navigation("Photos");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("DatingApp.API.Entities.Group", b =>
+                {
+                    b.Navigation("Connections");
                 });
 #pragma warning restore 612, 618
         }

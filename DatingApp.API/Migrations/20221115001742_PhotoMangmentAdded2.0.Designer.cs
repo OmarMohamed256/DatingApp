@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DatingApp.API.Data.Migrations
+namespace DatingApp.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221109212534_GroupsAdded")]
-    partial class GroupsAdded
+    [Migration("20221115001742_PhotoMangmentAdded2.0")]
+    partial class PhotoMangmentAdded20
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -233,6 +233,9 @@ namespace DatingApp.API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsApproved")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsMain")

@@ -1,4 +1,7 @@
+using DatingApp.API.DTOS;
 using DatingApp.API.Entities;
+using DatingApp.API.Interfaces;
+using DatingApp.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +12,12 @@ namespace DatingApp.API.Controllers
     public class AdminController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
-        public AdminController(UserManager<AppUser> userManager)
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IPhotoService _photoService;
+        public AdminController(UserManager<AppUser> userManager, IUnitOfWork unitOfWork, IPhotoService photoService)
         {
+            _photoService = photoService;
+            _unitOfWork = unitOfWork;
             _userManager = userManager;
         }
 
@@ -56,9 +63,39 @@ namespace DatingApp.API.Controllers
 
         [Authorize(Policy = "ModeratePhotoRole")]
         [HttpGet("photos-to-moderate")]
-        public ActionResult GetPhotosForModeration()
+        public async Task<ActionResult<IEnumerable<PhotoDto>>> GetPhotosForApproval()
         {
-            return Ok("Admins or moderators can see this");
+            var photos = await _unitOfWork.PhotoRepository.GetUnApprovedPhotos();
+            return Ok(photos);
+        }
+
+        [Authorize(Policy = "ModeratePhotoRole")]
+        [HttpPost("approve-photo/{photoId}")]
+        public async Task<ActionResult> ApprovePhoto(int photoId)
+        {
+            var photo = await _unitOfWork.PhotoRepository.GetPhotoById(photoId);
+            if(photo.IsApproved) return BadRequest("Photo Already Approved");
+            photo.IsApproved = true;
+            
+            var user = await _unitOfWork.UserRepository.GetUserByPhotoId(photoId);
+            if (!user.Photos.Any(x => x.IsMain)) photo.IsMain = true;
+
+            if (await _unitOfWork.Complete()) return Ok();
+
+            return BadRequest("Problem Approving Message");
+        }
+
+        [Authorize(Policy = "ModeratePhotoRole")]
+        [HttpPost("reject-photo/{photoId}")]
+        public async Task<ActionResult> RejectPhoto(int photoId){
+            
+            var photo = await _unitOfWork.PhotoRepository.GetPhotoById(photoId);
+            if (photo.PublicId != null){
+                var result =_photoService.DeletePhotoAsync(photo.PublicId);
+            }
+            _unitOfWork.PhotoRepository.RemovePhoto(photo);
+            await _unitOfWork.Complete();
+            return Ok();
         }
         
     }

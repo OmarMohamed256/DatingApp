@@ -21,6 +21,7 @@ namespace DatingApp.API.Data
         public IMessageRepository MessageRepository => new MessageRepository(_context, _mapper);
 
         public ILikesRepository LikesRepository => new LikesRepositary(_context);
+        public IPhotoRepository PhotoRepository => new PhotoRepositary(_context, _mapper);
 
         public async Task<bool> Complete()
         {

@@ -15,6 +15,11 @@
             {
                 "Url": "https://randomuser.me/api/portraits/women/54.jpg",
                 "IsMain": true
+            },
+            {
+                "Url": "https://randomuser.me/api/portraits/women/54.jpg",
+                "IsMain": false,
+                "IsApproved": false
             }
         ]
     },

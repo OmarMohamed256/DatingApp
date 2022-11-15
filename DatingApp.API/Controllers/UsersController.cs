@@ -45,7 +45,8 @@ namespace DatingApp.API.Controllers
 
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username){
-            return await _unitOfWork.UserRepository.GetMemberAsync(username);
+            var currentUsername = User.GetUsername();
+            return await _unitOfWork.UserRepository.GetMemberAsync(username, isCurrentUser: currentUsername == username);
         }
 
         [HttpPut]
@@ -73,13 +74,13 @@ namespace DatingApp.API.Controllers
             var photo = new Photo
             {
                 Url = result.SecureUrl.AbsoluteUri,
-                PublicId = result.PublicId
+                PublicId = result.PublicId,
             };
 
-            if(user.Photos.Count == 0)
-            {
-                photo.IsMain = true;
-            }
+            // if(user.Photos.Count == 0)
+            // {
+            //     photo.IsMain = true;
+            // }
 
             user.Photos.Add(photo);
 
@@ -100,13 +101,19 @@ namespace DatingApp.API.Controllers
 
             if(photo.IsMain) return BadRequest("This is already your main photo");
 
-            var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
-            if(currentMain != null) currentMain.IsMain = false;
-            photo.IsMain = true;
+            if(photo.IsApproved){
+                var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
+                 if(currentMain != null) currentMain.IsMain = false;
+                photo.IsMain = true;
 
-            if(await _unitOfWork.Complete()) return NoContent();
+                if(await _unitOfWork.Complete()) return NoContent();
 
-            return BadRequest("Failed to set main photo");
+                return BadRequest("Failed to set main photo");
+            }else{
+                return BadRequest("Photo not approved yet");
+            }
+
+            
         }
 
         [HttpDelete("delete-photo/{photoId}")]
